@@ -15,7 +15,10 @@ storage_context = StorageContext.from_defaults(persist_dir="storage")
 index = load_index_from_storage(storage_context)
 
 # Retrieve multiple relevant chunks
-query_engine = index.as_query_engine(similarity_top_k=3)
+query_engine = index.as_query_engine(
+        similarity_top_k=3,
+        streaming=True
+)
 
 print("Chatbot ready! Type 'exit' to quit.\n")
 
@@ -40,4 +43,8 @@ Question: {question}
 
     response = query_engine.query(enhanced_query)
 
-    print("\nBot:", response, "\n")
+    # Stream tokens as they are generated
+    for token in response.response_gen:
+        print(token, end="", flush=True)
+
+    print("\n")
