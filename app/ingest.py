@@ -17,22 +17,30 @@ def load_events_from_mongo():
     db = client[DB_NAME]
     collection = db[COLLECTION_NAME]
 
-    docs = list(collection.find({"approvalStatus": "approved"}))
+    docs = list(collection.find({
+          "approvalStatus": "approved"     
+    }))
 
     documents = []
 
     for doc in docs:
         # Format date nicely
-        date = doc.get("eventDate")
-        if date:
-            date = date.strftime("%B %d, %Y")
+        event_date = doc.get("eventDate")
+        
+        if event_date:
+            formatted_date = event_date.strftime("%B %d, %Y")
+            is_past = event_date < datetime.now()
         else:
-            date = "Unknown"
+            formatted_date = "Unknown"
+            is_past = False
+
+        status = "Past Event" if is_past else "Upcoming Event"
 
         text = f"""
 Event: {doc.get('eventName')}
 Category: {doc.get('category')}
-Date: {date}
+Date: {formatted_date}
+Status: {status}
 Location: {doc.get('eventLocation')}
 Organizer: {doc.get('organizerUsername')}
 Club: {doc.get('clubAssociation')}

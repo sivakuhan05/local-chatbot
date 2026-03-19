@@ -17,8 +17,8 @@ index = load_index_from_storage(storage_context)
 
 # Retrieve multiple relevant chunks
 query_engine = index.as_query_engine(
-        similarity_top_k=3,
-        streaming=True
+    similarity_top_k=3,
+    streaming=True
 )
 
 print("Chatbot ready! Type 'exit' to quit.\n")
@@ -26,7 +26,8 @@ print("Chatbot ready! Type 'exit' to quit.\n")
 while True:
     question = input("Ask: ")
 
-    if question.strip().lower() == "exit":
+    if question.strip().lower() in ["exit", "quit", "q"]:
+        print("Goodbye!")
         break
 
     # Inject current date
@@ -34,26 +35,43 @@ while True:
 
     # Simple keyword trigger for RAG
     keywords = ["exam", "event", "hackathon", "fest", "schedule", "date"]
-    
     use_rag = any(word in question.lower() for word in keywords)
 
     print("\nBot: ", end="", flush=True)
 
     if use_rag:
         enhanced_query = f"""
-You are a helpful college assistant that answers student questions about exams and events.
+You are a college assistant chatbot.
 
 Today's date is {today}.
 
-Use the provided context to answer the question clearly and naturally.
+Answer in a natural and friendly tone, but keep it concise.
+Avoid being overly robotic or overly verbose.
+
+Only consider events marked as "Upcoming Event".
+Ignore events marked as "Past Event".
+
+If there are upcoming events:
+- Briefly mention them in a natural sentence
+- Include event name, date, and location
+
+If there are no upcoming events, say:
+"There are currently no upcoming events."
 
 Question: {question}
 """
 
         response = query_engine.query(enhanced_query)
 
+        full_response = ""
+
         for token in response.response_gen:
             print(token, end="", flush=True)
+            full_response += token
+
+        # Only fallback if nothing was generated at all
+        if not full_response.strip():
+            print("There are currently no upcoming events.", end="")
 
         print("\n")
 
@@ -64,10 +82,7 @@ Question: {question}
 
         for token in stream:
             new_text = token.delta
-
-            # Print only the new part
             print(new_text, end="", flush=True)
-
             full_response += new_text
-   
+
         print("\n")
