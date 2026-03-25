@@ -1,82 +1,136 @@
 # College AI Assistant
 
-Local RAG chatbot for answering college event and exam queries.
+Local RAG chatbot for answering college event queries using a local LLM and MongoDB.
+
+---
+
+## Features
+
+* Local LLM using Llama3 via Ollama
+* Retrieval-Augmented Generation (RAG)
+* MongoDB Atlas integration (events collection)
+* Semantic search using embeddings (HuggingFace)
+* Conditional RAG (uses data only when needed)
+* Streaming responses
+
+---
 
 ## Setup
 
-1. Install Python
+### 1. Install Python
 
-2. Install Ollama
+Ensure Python 3.10+ is installed.
 
+---
+
+### 2. Install Ollama
+
+Linux:
 ```
 curl -fsSL https://ollama.com/install.sh | sh
 ```
 
-3. Create virtual environment
+Windows:
+```
+irm https://ollama.com/install.ps1 | iex
+```
+
+---
+
+### 3. Create and activate virtual environment
 
 ```
 python3 -m venv venv
 source venv/bin/activate
 ```
 
-4. Install dependencies
+---
+
+### 4. Install dependencies
 
 ```
 pip install -r requirements.txt
 ```
 
-5. Download the Llama3 model
+---
+
+### 5. Download the Llama3 model
 
 ```
 ollama run llama3
 ```
 
-(The first run downloads the model. You can exit the chat with `/bye` once the download finishes.)
+(First run downloads the model. Exit with `/bye` once done.)
+
+---
+
+## Environment Variables
+
+Create a `.env` file in the project root:
+
+```
+MONGO_URI=your_mongodb_uri
+DB_NAME=your_database_name
+COLLECTION_NAME=your_collection_name
+```
+
+---
 
 ## Build the knowledge base
 
-After adding or updating files in the `data/` folder, generate the vector index:
+Fetch events from MongoDB and generate the vector index:
 
 ```
 python app/ingest.py
 ```
 
-This creates the `storage/` directory containing the vector database used for retrieval.
-
-Note: `storage/` is generated automatically and is ignored by Git.
+---
 
 ## Run the chatbot
-
-Start the CLI chatbot:
 
 ```
 python app/chatbot.py
 ```
 
-Example questions you can try:
+---
+
+## Example queries
 
 ```
-When is the next exam?
-Where is the hackathon?
-When do mid semester exams start?
+Are there any upcoming events?
+What tech events are there?
+Where is Codex happening?
 ```
 
-Type `exit` to quit the chatbot.
+---
+
+## Behavior
+
+* Uses MongoDB (events collection) as the data source
+* Uses RAG only for relevant queries
+* Handles general chat without retrieval
+* Distinguishes between upcoming and past events
+* Lists upcoming events when available
+
+---
 
 ## Project Structure
 
 ```
 app/
-  chatbot.py        # CLI chatbot interface
-  ingest.py         # builds vector index from documents
-
-data/
-  events.txt
-  exams.txt
+  chatbot.py        # CLI chatbot
+  ingest.py         # loads MongoDB data and builds index
 
 storage/            # generated vector index (ignored by git)
 
 requirements.txt
 README.md
 ```
+
+---
+
+## Notes
+
+* `storage/` is generated automatically and should not be committed
+* Model runs locally; CPU usage may spike during responses
 
