@@ -2,14 +2,19 @@ from pymongo import MongoClient
 from llama_index.core import VectorStoreIndex, Document, Settings
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from datetime import datetime
+from dotenv import load_dotenv
+import os
 
 # Set embedding model
 Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en")
 
 # MongoDB connection
-MONGO_URI = "mongodb+srv://eventadmin:Anbu12345@aicteproject.6gf5noy.mongodb.net/?appName=AicteProject"
-DB_NAME = "eventverse"
-COLLECTION_NAME = "events"
+load_dotenv()
+MONGO_URI = os.getenv("MONGO_URI")
+if not MONGO_URI:
+    raise ValueError("MONGO_URI not set in .env file")
+DB_NAME = os.getenv("DB_NAME")
+COLLECTION_NAME = os.getenv("COLLECTION_NAME")
 
 
 def load_events_from_mongo():
